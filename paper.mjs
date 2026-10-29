@@ -1,6 +1,6 @@
-import {updateCharts} from './paper-charts.mjs?v=compact4v1';
-import {holdModel,pnlModel,entryDelay,formatDuration,formatUTC,formatSOL,formatPercent,strategyLabel,safeLinks,selectPositions,countModel} from './paper-table-model.mjs?v=compact4v1';
-const feed='https://raw.githubusercontent.com/RamonHitramon/sol100/refs/heads/paper-feed/live-paper.json';
+import {updateCharts} from './paper-charts.mjs?v=mig1hv1';
+import {holdModel,pnlModel,entryDelay,formatDuration,migrationAge,formatMigrationAge,formatUTC,formatSOL,formatPercent,strategyLabel,safeLinks,selectPositions,countModel} from './paper-table-model.mjs?v=mig1hv1';
+const feed='https://raw.githubusercontent.com/RamonHitramon/solmig1h/refs/heads/paper-feed/live-paper.json';
 const $=id=>document.getElementById(id);
 const sol=v=>Number(v).toFixed(3)+' SOL';
 const at=t=>t?new Date(t*1000).toLocaleString('en-GB',{timeZone:'UTC'})+' UTC':'—';
@@ -9,7 +9,7 @@ const field=(list,key,value)=>{const line=el('div');line.append(el('dt',key),el(
 let state=null,busy=false;
 function render(){
  const s=state,age=Date.now()/1000-s.updated_at,stale=age>300;
- $('status').textContent=(s.run_status==='stopped'?'■ Test stopped · ':stale?'⚠ Snapshot is stale. ':'● Paper test running · ')+at(s.stopped_at||s.updated_at)+(s.run_id?' · '+s.run_id:'')+' · signals: '+s.signals;
+ $('status').textContent=(s.run_status==='preparing'?'◌ Preparing test · ':s.run_status==='stopped'?'■ Test stopped · ':stale?'⚠ Snapshot is stale. ':'● Paper test running · ')+at(s.stopped_at||s.updated_at)+(s.run_id?' · '+s.run_id:'')+' · signals: '+s.signals;
  $('status').className=stale?'warning':'muted';$('wallets').replaceChildren();
  const active=s.wallets.filter(w=>!w.disabled).length;
  $('active-strategies').textContent=`Active strategies: ${active}. New signals → real Jupiter quotes → virtual trades; no hindsight peak selection.`;
@@ -26,7 +26,7 @@ export function renderTrades(s){
  const count=countModel(s,ps.length);
  $('trade-count').textContent=`Showing ${count.shown} of ${count.loaded} in snapshot · total ${count.total}`+(count.truncated?' · Feed: latest 200 only; selection and sorting apply to loaded rows.':'');
  $('trade-asof').textContent='As of: '+formatUTC(s.updated_at).replace('\n',' · ')+' · Open HOLD uses snapshot time; FROZEN uses frozen_at (missing timestamp: —). Frozen PnL is not a current quote.';
- if(!ps.length){const row=el('tr'),cell=el('td',s.signals?'No trades match this selection yet.':'Waiting for the first new eligible signal. Old signals are not bought retroactively.','empty');cell.colSpan=9;row.append(cell);body.append(row);}
+ if(!ps.length){const row=el('tr'),cell=el('td',s.signals?'No trades match this selection yet.':'Waiting for the first new eligible signal. Old signals are not bought retroactively.','empty');cell.colSpan=10;row.append(cell);body.append(row);}
  for(const p of ps){
   const row=el('tr'),token=el('th',undefined,'token-cell');token.scope='row';token.append(el('strong',p.symbol||'—','token-name'));
   const links=safeLinks(p),linksRow=el('div',undefined,'token-links');
@@ -36,6 +36,7 @@ export function renderTrades(s){
   const frozen=p.strategy_disabled===true&&p.closed==null;
   const name=strategyLabel(p.strategy,s.wallets.find(w=>w.id===p.strategy)?.name)+(archived?' · archived':'');const strategy=el('td',name,'strategy-cell');
   strategy.title=name;if(p.strategy==='tp30be')strategy.append(el('small',p.armed?'Break-even armed':'Waiting for +15%'));row.append(strategy);
+  const age=el('td',undefined,'numeric token-age');age.append(el('strong',formatMigrationAge(migrationAge(p))));age.title='Created: '+formatUTC(p.created_at)+' · Migration: '+formatUTC(p.migration_at)+' · Market open: '+formatUTC(p.market_open_at);row.append(age);
   row.append(el('td',formatUTC(p.signal_at),'utc'),el('td',formatUTC(p.opened),'utc'),el('td',formatDuration(entryDelay(p)),'numeric'));
   const exit=el('td',p.closed==null?(frozen?'FROZEN':'OPEN'):formatUTC(p.closed),p.closed==null?'muted':'utc');exit.title=frozen?'Frozen: '+formatUTC(p.frozen_at).replace('\n',' · '):p.reason||'Open virtual position';row.append(exit);
   const hold=holdModel(p,s.updated_at);row.append(el('td',formatDuration(hold.seconds),'numeric '+hold.tone));

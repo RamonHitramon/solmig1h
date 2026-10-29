@@ -1,4 +1,4 @@
-import {plotModel,pathFor} from './paper-chart-model.mjs?v=compact4v1';
+import {plotModel,pathFor} from './paper-chart-model.mjs?v=mig1hv1';
 const colors={tp20:'#50d7ad',tp25:'#8e9eff',tp30:'#ffca7a',tp35:'#66c8f2',tp40:'#ef91c2',tp30be:'#d0a5ff'};
 const names={tp20:'TP20',tp25:'TP25',tp30:'TP30',tp35:'TP35',tp40:'TP40',tp30be:'TP30BE15'};
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e};

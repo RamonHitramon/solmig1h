@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {plotModel} from './paper-chart-model.mjs?v=compact4v1';
+import {plotModel} from './paper-chart-model.mjs?v=mig1hv1';
 const h={started_at:100,asof:1000,series:[{id:'tp20',name:'TP20',points:[[100,0,0,1],[200,2,0,.1],[1000,.5,0,.8]],realized:[[100,0],[400,.3]],trade_counts:[[100,0,0],[200,3,0],[400,3,2]],gaps:[]}]};
 test('PnL domains are shared across displayed metrics, units and window',()=>{
  const modes=['equity','cash','realized'];

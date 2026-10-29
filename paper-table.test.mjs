@@ -25,9 +25,9 @@ test('formatters preserve missing data, UTC seconds, signed 3-decimal SOL and co
 });
 test('links allow only base58 mint GMGN paths and exact existing Telegram calls',()=>{
  const mint='So11111111111111111111111111111111111111112';
- assert.deepEqual(model.safeLinks({address:mint,source_url:'https://t.me/mcap100k_sol/123'}),{gmgn:'https://gmgn.ai/sol/token/'+mint,telegram:'https://t.me/mcap100k_sol/123'});
+ assert.deepEqual(model.safeLinks({address:mint,source_url:'https://t.me/c/4466268904/123'}),{gmgn:'https://gmgn.ai/sol/token/'+mint,telegram:'https://t.me/c/4466268904/123'});
  for(const address of ['<script>',mint+'?t=1','0'.repeat(44),'',null]) assert.equal(model.safeLinks({address}).gmgn,null);
- for(const source_url of ['javascript:alert(1)','https://t.me.evil/mcap100k_sol/123','https://t.me/mcap100k_sol/123?x=1']) assert.equal(model.safeLinks({source_url}).telegram,null);
+ for(const source_url of ['javascript:alert(1)','https://t.me.evil/mcap100k_sol/123','https://t.me/c/4466268904/123?x=1']) assert.equal(model.safeLinks({source_url}).telegram,null);
  assert.equal(model.safeLinks({address:mint,gmgn_url:'javascript:alert(1)'}).gmgn,'https://gmgn.ai/sol/token/'+mint);
 });
 test('filters and numeric sorting are immutable, missing values last in both directions',()=>{
@@ -57,17 +57,17 @@ test('frontend renders safe rows, snapshot marks, empty tbody and preserves filt
  const ids=Object.fromEntries(['status','wallets','filter','status-filter','sort','positions','health','download','refresh','error','trade-count','trade-asof','active-strategies','active-rules'].map(id=>[id,new Node()]));
  ids.sort.value='latest'; const option=new Node('option');option.value='tp100';option.textContent='TP 2×';ids.filter.children.push(option);ids.filter.options=ids.filter.children;
  const globals={document:globalThis.document,fetch:globalThis.fetch,setInterval:globalThis.setInterval};
- const snapshot={mode:'PAPER_ONLY',updated_at:200,started_at:100,signals:1,wallets:Array.from({length:5},(_,i)=>({id:'tp'+i,name:'Wallet '+i,net_sol:0,equity_sol:1,cash_sol:1,realised_sol:0,open:1,closed:0})),positions:[{symbol:'<img onerror=bad>',strategy:'tp0',address:'So11111111111111111111111111111111111111112',opened:100,last_seen:100,last_mark:.2,cost:.1,signal_at:null,entry_delay_seconds:null}]};
+ const snapshot={mode:'PAPER_ONLY',updated_at:200,started_at:100,signals:1,wallets:Array.from({length:5},(_,i)=>({id:'tp'+i,name:'Wallet '+i,net_sol:0,equity_sol:1,cash_sol:1,realised_sol:0,open:1,closed:0})),positions:[{symbol:'<img onerror=bad>',strategy:'tp0',address:'So11111111111111111111111111111111111111112',opened:100,last_seen:100,last_mark:.2,cost:.1,signal_at:null,entry_delay_seconds:null,age_at_migration_seconds:3661}]};
  try {
   globalThis.document={getElementById:id=>ids[id]||null,createElement:tag=>new Node(tag)};
   globalThis.setInterval=()=>0; globalThis.fetch=async()=>({ok:true,json:async()=>snapshot});
   await import('./paper.mjs?v=r4visual1'); await new Promise(resolve=>setImmediate(resolve));
   assert.equal(ids.wallets.children.length,5); assert.equal(ids.positions.children[0].tag,'tr');
-  const row=ids.positions.children[0]; assert.equal(row.children.length,9); assert.equal(row.children[0].children[0].textContent,'<img onerror=bad>');
-  assert.equal(row.children[2].textContent,'—'); assert.equal(row.children[4].textContent,'—');
-  assert.equal(row.children[6].textContent,'1m 40s'); assert.match(row.children[7].children[0].textContent,/≈ \+0.098 SOL/);
+  const row=ids.positions.children[0]; assert.equal(row.children.length,10); assert.equal(row.children[0].children[0].textContent,'<img onerror=bad>');assert.equal(row.children[2].children[0].tag,'strong');assert.equal(row.children[2].children[0].textContent,'1h 1m 1s');
+  assert.equal(row.children[3].textContent,'—'); assert.equal(row.children[5].textContent,'—');
+  assert.equal(row.children[7].textContent,'1m 40s'); assert.match(row.children[8].children[0].textContent,/≈ \+0.098 SOL/);
   ids.filter.value='missing'; ids['status-filter'].value='closed'; ids.sort.value='oldest'; ids.filter.events.change();
-  assert.equal(ids.positions.children[0].children[0].colSpan,9);
+  assert.equal(ids.positions.children[0].children[0].colSpan,10);
   await ids.refresh.events.click();
   assert.equal(ids.filter.value,'missing'); assert.equal(ids['status-filter'].value,'closed'); assert.equal(ids.sort.value,'oldest');
   const text=n=>[n.textContent||'',...n.children.map(text)].join(' ');
@@ -82,12 +82,12 @@ test('frontend renders safe rows, snapshot marks, empty tbody and preserves filt
   assert.equal(ids.wallets.children[0].children[2].className,'big muted');
   assert.equal(ids.filter.options[0].textContent,'TP 2× · archived');
   assert.match(ids['active-strategies'].textContent,/4/);assert.match(ids['active-rules'].textContent,/4/);
-  const frozen=ids.positions.children.find(r=>r.children[5].textContent==='FROZEN');assert.ok(frozen);
-  assert.equal(frozen.children[6].textContent,'50s');assert.match(frozen.children[1].textContent,/archived/);
-  assert.match(text(frozen.children[7]),/frozen/);assert.equal(frozen.children[7].className,'numeric muted');
-  assert.match(frozen.children[7].title,/00:02:20 UTC/);
-  const closed=ids.positions.children.find(r=>r!==frozen);assert.equal(closed.children[7].children[0].textContent,'+0.020 SOL');
-  assert.doesNotMatch(text(closed.children[7]),/frozen|≈/);
+  const frozen=ids.positions.children.find(r=>r.children[6].textContent==='FROZEN');assert.ok(frozen);
+  assert.equal(frozen.children[7].textContent,'50s');assert.match(frozen.children[1].textContent,/archived/);
+  assert.match(text(frozen.children[8]),/frozen/);assert.equal(frozen.children[8].className,'numeric muted');
+  assert.match(frozen.children[8].title,/00:02:20 UTC/);
+  const closed=ids.positions.children.find(r=>r!==frozen);assert.equal(closed.children[8].children[0].textContent,'+0.020 SOL');
+  assert.doesNotMatch(text(closed.children[8]),/frozen|≈/);
   snapshot.run_status='stopped';snapshot.stopped_at=200;
   await ids.refresh.events.click();
   assert.match(ids.status.textContent,/Test stopped/);

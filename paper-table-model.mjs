@@ -10,6 +10,8 @@ export function pnlModel(p, asof) {
  const stale = approx && (!timestamp(asof) || !timestamp(p.last_seen) || p.last_seen>asof || asof-p.last_seen>90);
  return {net,percent:net!==null && p.cost>0 ? net/p.cost*100:null,approx,stale};
 }
+export const migrationAge=p=>finite(p.age_at_migration_seconds)&&p.age_at_migration_seconds>=0?p.age_at_migration_seconds:null;
+export function formatMigrationAge(v){if(!finite(v)||v<0)return '—';const n=Math.floor(v),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return [h?h+'h':'',m?m+'m':'',s?s+'s':''].filter(Boolean).join(' ')||'0s';}
 export const entryDelay = p => finite(p.entry_delay_seconds) && p.entry_delay_seconds >= 0 ? p.entry_delay_seconds : null;
 export function formatDuration(v) {
  if (!finite(v) || v<0) return '—';
@@ -32,17 +34,17 @@ export const formatPercent = v => signed(v,2,'%');
 export function safeLinks(p) {
  // Build GMGN from a validated mint only; never add undocumented timestamp queries.
  const gmgn=typeof p.address==='string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(p.address) ? 'https://gmgn.ai/sol/token/'+p.address : null;
- const telegram=typeof p.source_url==='string' && /^https:\/\/t\.me\/mcap100k_sol\/\d+$/.test(p.source_url) ? p.source_url : null;
+ const telegram=typeof p.source_url==='string' && /^https:\/\/t\.me\/c\/4466268904\/(?:25\/)?\d+$/.test(p.source_url) ? p.source_url : null;
  return {gmgn,telegram};
 }
 export function selectPositions(positions,{strategy='all',status='all',sort='latest'}={},asof) {
  const rows=(positions||[]).filter(p=>(strategy==='all'||p.strategy===strategy)&&(status==='all'||(status==='open'?p.closed==null:p.closed!=null)));
- const value=p=>sort.startsWith('hold-')?holdModel(p,asof).seconds:sort.startsWith('pnl-')?pnlModel(p,asof).net:timestamp(p.opened)?p.opened:null;
+ const value=p=>sort.startsWith('age-')?migrationAge(p):sort.startsWith('hold-')?holdModel(p,asof).seconds:sort.startsWith('pnl-')?pnlModel(p,asof).net:timestamp(p.opened)?p.opened:null;
  return rows.sort((a,b)=>{
   if(sort==='strategy') return String(a.strategy??'').localeCompare(String(b.strategy??''));
   const av=value(a),bv=value(b);
   if(av===null||bv===null) return av===bv?0:av===null?1:-1;
-  return (av-bv)*(['oldest','hold-asc','pnl-asc'].includes(sort)?1:-1);
+  return (av-bv)*(['oldest','hold-asc','pnl-asc','age-asc'].includes(sort)?1:-1);
  });
 }
 export function countModel(s,shown) {

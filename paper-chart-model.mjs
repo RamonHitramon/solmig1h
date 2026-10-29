@@ -1,4 +1,4 @@
-import {strategyLabel} from './paper-table-model.mjs?v=compact4v1';
+import {strategyLabel} from './paper-table-model.mjs?v=mig1hv1';
 export function plotModel(history,mode='equity',units='SOL',enabled=null,hours=0){
  const end=Number(history?.asof)||0,start=Number(history?.started_at)||end,min=hours?Math.max(start,end-hours*3600):start;
  const selected=(history?.series||[]).filter(s=>!enabled||enabled.includes(s.id));

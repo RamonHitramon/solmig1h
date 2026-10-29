@@ -4,7 +4,7 @@ test('archived chart legends, cash labels and inspection remain historical',asyn
  const root=new Node('section'),previous=globalThis.document;
  globalThis.document={getElementById:()=>root,createElement:t=>new Node(t),createElementNS:(_,t)=>new Node(t)};
  try{
-  const {updateCharts}=await import('./paper-charts.mjs?v=compact4v1');
+  const {updateCharts}=await import('./paper-charts.mjs?v=mig1hv1');
   updateCharts({run_id:'x',wallets:[{id:'tp40',disabled:true,cash_sol:.8}],config:{disabled_strategies:{tp40:{disabled_at:150}}},performance_history:{run_id:'x',started_at:100,asof:300,series:[{id:'tp40',name:'TP40',disabled_at:150,points:[[100,0,0,1,false],[150,.1,0,.8,false]],realized:[[100,0],[150,.01]]}]}});
   const text=n=>[n.textContent||'',...n.children.map(text)].join(' ');
   assert.match(text(root.children[1]),/TP40 · archived/);
@@ -16,7 +16,7 @@ test('HTML exposes dynamic active counts without asserting five current strategi
  const html=await readFile(new URL('./index.html',import.meta.url),'utf8');
  assert.match(html,/id="active-strategies"/);assert.match(html,/id="active-rules"/);assert.doesNotMatch(html,/Five independent strategies/);
  for(const file of ['paper.mjs','paper-charts.mjs','paper-chart-model.mjs','paper-table-model.mjs']){
-  const sources=html+await readFile(new URL('./paper.mjs?v=compact4v1',import.meta.url),'utf8')+await readFile(new URL('./paper-charts.mjs?v=compact4v1',import.meta.url),'utf8');
-  assert.ok(sources.includes(file+'?v='+'compact4v1'));
+  const sources=html+await readFile(new URL('./paper.mjs?v=mig1hv1',import.meta.url),'utf8')+await readFile(new URL('./paper-charts.mjs?v=mig1hv1',import.meta.url),'utf8');
+  assert.ok(sources.includes(file+'?v='+'mig1hv1'));
  }
 });

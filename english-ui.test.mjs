@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {strategyLabel,formatSOL} from './paper-table-model.mjs?v=compact4v1';
-import {plotModel} from './paper-chart-model.mjs?v=compact4v1';
+import {strategyLabel,formatSOL} from './paper-table-model.mjs?v=mig1hv1';
+import {plotModel} from './paper-chart-model.mjs?v=mig1hv1';
 
 const files=['index.html','paper.mjs','paper-charts.mjs','paper-chart-model.mjs','paper-table-model.mjs'];
 const ids=['tp20','tp25','tp30','tp35','tp40','tp30be'];
@@ -23,19 +23,19 @@ test('English main UI preserves terminology, rules, links and consistent module 
  for(let i=0;i<files.length;i++){
   // Deliberately stricter than UI-only: production sources contain no Cyrillic, even in comments.
   assert.doesNotMatch(sources[i],cyrillic,files[i]);
-  for(const match of sources[i].matchAll(/(?:from\s+|import\(|src=)["'](\.\/)?(paper[^"']*\.mjs)(\?[^"']*)?["']/g))assert.equal(match[3],'?v=compact4v1',match[0]);
+  for(const match of sources[i].matchAll(/(?:from\s+|import\(|src=)["'](\.\/)?(paper[^"']*\.mjs)(\?[^"']*)?["']/g))assert.equal(match[3],'?v=mig1hv1',match[0]);
  }
  const html=sources[0],visible=html.replace(/<style>[\s\S]*?<\/style>/g,'').replace(/<\/(?:p|h[1-6]|section|nav)>/g,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
- assert.match(html,/<html lang="en">/);assert.match(html,/<h1>SOL100 R4<\/h1>/);
- assert.match(visible,/Filter: SOL · MC100K/);assert.deepEqual(visible.match(/#[a-z0-9]+/gi),['#sol100r4']);
- assert.match(visible,/Filter determines eligible SOL 100K crossing signals/);
- assert.match(visible,/Strategies are exit rules/);assert.match(visible,/Test SOL100 R4 compares six independent virtual accounts/);
+ assert.match(html,/<html lang="en">/);assert.match(html,/<h1>SOL MIG1H M1<\/h1>/);
+ assert.match(visible,/Filter: SOL · MIG1H/);assert.deepEqual(visible.match(/#[a-z0-9]+/gi),['#solmig1hm1']);
+ assert.match(visible,/Filter determines eligible SOL migration-age signals/);
+ assert.match(visible,/Strategies are exit rules/);assert.match(visible,/Test SOL MIG1H M1 compares six independent virtual accounts/);
  assert.match(visible,/gross \+15%.*fixed modeled net break-even stop/);assert.match(visible,/TP30 remains active/);
  assert.match(visible,/not a trailing stop/);assert.match(visible,/sampled quotes; a gap can produce a negative result/);
  assert.match(visible,/Free SOL is spendable virtual cash, not the marked value of open tokens/);
  assert.match(visible,/shared persistent budget of 48 quotes\/min/);
  assert.match(html,/href="https:\/\/ramonhitramon.github.io\/gmgn_100kmcap\/"/);
- assert.match(html,/rel="canonical" href="https:\/\/ramonhitramon.github.io\/sol100\/"/);
+ assert.match(html,/rel="canonical" href="https:\/\/ramonhitramon.github.io\/solmig1h\/"/);
  for(let i=0;i<ids.length;i++)assert.ok(html.includes(`value="${ids[i]}">${labels[i]}</option>`));
  assert.doesNotMatch(sources.join(''),/TP30 · BE15|r4set2/);
 });
@@ -56,7 +56,7 @@ test('rendered cards, table, break-even states, empty states and errors are Engl
  try{
   globalThis.document={getElementById:id=>elements[id]||null,createElement:tag=>new Node(tag)};
   globalThis.setInterval=()=>0;globalThis.fetch=async()=>({ok:true,json:async()=>snapshot});
-  await import('./paper.mjs?v=compact4v1');await new Promise(resolve=>setImmediate(resolve));
+  await import('./paper.mjs?v=mig1hv1');await new Promise(resolve=>setImmediate(resolve));
   const allText=()=>Object.values(elements).map(text).join(' ');
   assert.doesNotMatch(allText(),cyrillic);
   for(const label of labels)assert.match(text(elements.wallets),new RegExp(label));
@@ -79,7 +79,7 @@ test('rendered chart controls, accessibility labels, cash and tooltips are Engli
  const root=new Node('section'),previous=globalThis.document;
  try{
   globalThis.document={getElementById:()=>root,createElement:tag=>new Node(tag),createElementNS:(_,tag)=>new Node(tag)};
-  const {updateCharts}=await import('./paper-charts.mjs?v=compact4v1');
+  const {updateCharts}=await import('./paper-charts.mjs?v=mig1hv1');
   updateCharts({run_id:'R4'});assert.match(text(root),/Account history is loading/);
   updateCharts({run_id:'R4',wallets:ids.map(id=>({id,cash_sol:.9})),performance_history:{run_id:'R4',started_at:100,asof:200,series:ids.map(id=>({id,name:'Старое имя',points:[[100,0,0,1,false],[200,.02,0,.9,false]],realized:[[100,0],[200,0]],gaps:[]}))}});
   assert.doesNotMatch(text(root),cyrillic);
